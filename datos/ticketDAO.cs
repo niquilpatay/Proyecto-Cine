@@ -9,22 +9,27 @@ using cineLabo.dominio;
 
 namespace cineLabo.datos
 {
+    // Class implementing data access logic, inheriting from accesoDB
     internal class ticketDAO : accesoDB
     {
         private static ticketDAO instancia;
+
+        // Ensure a single instance of ticketDAO
         public static ticketDAO crearInstancia()
         {
-            if(instancia == null)
+            if (instancia == null)
             {
                 instancia = new ticketDAO();
             }
             return instancia;
         }
 
+        // Retrieve the next ticket using a stored procedure
         public int proximoTicket()
         {
             SqlParameter p = new SqlParameter("@prox", SqlDbType.Int);
             int verificacion = 0;
+
             try
             {
                 comando.Parameters.Clear();
@@ -33,6 +38,7 @@ namespace cineLabo.datos
                 p.Direction = ParameterDirection.Output;
                 comando.Parameters.Add(p);
                 comando.ExecuteNonQuery();
+
                 try
                 {
                     verificacion = (int)p.Value;
@@ -41,21 +47,24 @@ namespace cineLabo.datos
                 {
                     return 1;
                 }
+
                 return (int)p.Value;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw e;
             }
             finally
             {
-                if(conexion.State == ConnectionState.Open)
+                // Close the connection if open
+                if (conexion.State == ConnectionState.Open)
                 {
                     desconectar();
                 }
             }
         }
 
+        // Retrieve a list of payment types using a stored procedure
         public DataTable listarTipoPagos()
         {
             comando.Parameters.Clear();
@@ -66,6 +75,8 @@ namespace cineLabo.datos
             desconectar();
             return tabla;
         }
+
+        // Retrieve a list of branches using a stored procedure
         public DataTable listarSucursales()
         {
             comando.Parameters.Clear();
@@ -76,6 +87,8 @@ namespace cineLabo.datos
             desconectar();
             return tabla;
         }
+
+        // Retrieve a list of clients using a stored procedure
         public DataTable listarClientes()
         {
             comando.Parameters.Clear();
@@ -86,6 +99,8 @@ namespace cineLabo.datos
             desconectar();
             return tabla;
         }
+
+        // Retrieve a list of reservations using a stored procedure
         public DataTable listarReservas()
         {
             comando.Parameters.Clear();
@@ -96,6 +111,8 @@ namespace cineLabo.datos
             desconectar();
             return tabla;
         }
+
+        // Retrieve a list of functions using a stored procedure
         public DataTable listarFunciones()
         {
             comando.Parameters.Clear();
@@ -107,56 +124,61 @@ namespace cineLabo.datos
             return tabla;
         }
 
+        // Inserts a new ticket and its details using a stored procedure
         public bool insertarTicket(Ticket t)
         {
-            bool ok = true;
-            SqlTransaction transaction = null;
+            bool ok = true; // Flag to track the success of the operation
+            SqlTransaction transaction = null; // SQL transaction for ensuring data integrity
 
             try
             {
-                comando.Parameters.Clear();
-                conectar();
+                comando.Parameters.Clear(); // Clear any existing parameters
+                conectar(); // Open the database connection
 
-                transaction = conexion.BeginTransaction();
-                comando.Transaction = transaction;
-                comando.CommandText = "SP_INSERTAR_TICKET";
+                transaction = conexion.BeginTransaction(); // Begin a SQL transaction
+                comando.Transaction = transaction; // Assign the transaction to the command
+                comando.CommandText = "SP_INSERTAR_TICKET"; // Set the stored procedure for inserting a ticket
+
+                // Set parameters for the ticket
                 comando.Parameters.AddWithValue("@id_tipo_pago", t.id_tipo_pago);
                 comando.Parameters.AddWithValue("@id_sucursal", t.id_sucursal);
                 comando.Parameters.AddWithValue("@id_cliente", t.id_cliente);
                 comando.Parameters.AddWithValue("@fecha_compra", t.fecha_compra);
-                comando.ExecuteNonQuery();
-                comando.Parameters.Clear();
+                comando.ExecuteNonQuery(); // Execute the command to insert the ticket
+                comando.Parameters.Clear(); // Clear parameters for the next operation
                 int count = 1;
 
+                // Iterate through the details of the ticket
                 foreach (DetalleTicket d in t.DetalleTickets)
                 {
-                    comando.CommandText = "SP_INSERTAR_DETALLES";
+                    comando.CommandText = "SP_INSERTAR_DETALLES"; // Set the stored procedure for inserting ticket details
+                                                                  // Set parameters for the ticket details
                     comando.Parameters.AddWithValue("@id_funcion", d.funcion.id_funcion);
                     comando.Parameters.AddWithValue("@id_asiento", d.id_asiento);
                     comando.Parameters.AddWithValue("@descuento", d.descuento);
                     comando.Parameters.AddWithValue("@id_reserva", d.id_reserva);
-                    comando.Parameters.AddWithValue("@id_ticket", t.id_ticket);
+                    comando.Parameters.AddWithValue("@id_ticket", t.id_ticket); 
                     comando.Parameters.AddWithValue("@costo", d.costo);
                     count++;
-                    comando.ExecuteNonQuery();
-                    comando.Parameters.Clear();
+                    comando.ExecuteNonQuery(); // Execute the command to insert ticket details
+                    comando.Parameters.Clear(); // Clear parameters for the next iteration
                 }
 
-                transaction.Commit();
+                transaction.Commit(); // Commit the transaction as all operations were successful
             }
             catch (Exception)
             {
-                transaction.Rollback();
-                ok = false;
+                transaction.Rollback(); // Rollback the transaction in case of an exception
+                ok = false; // Set the flag to indicate a failure
             }
             finally
             {
                 if (conexion.State == ConnectionState.Open)
                 {
-                    desconectar();
+                    desconectar(); // Close the database connection if it's still open
                 }
             }
-            return ok;
+            return ok; // Return the success status
         }
     }
 }

@@ -9,6 +9,7 @@ using cineLabo.dominio;
 
 namespace cineLabo.datos
 {
+    // Interface defining the contract for data access operations
     internal interface iTicketDAO
     {
         int getProximoTicket();

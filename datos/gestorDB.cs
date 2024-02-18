@@ -9,35 +9,16 @@ using System.Data.SqlClient;
 
 namespace cineLabo.datos
 {
+    // Class implementing iTicketDAO interface, serving as a manager for database operations
     internal class gestorDB : iTicketDAO
     {
-        public int getProximoTicket()
-        {
-            return ticketDAO.crearInstancia().proximoTicket();
-        }
-        public bool getInsertarTicket(Ticket t)
-        {
-            return ticketDAO.crearInstancia().insertarTicket(t);
-        }
-        public DataTable getListarTipoPagos()
-        {
-            return ticketDAO.crearInstancia().listarTipoPagos();
-        }
-        public DataTable getListarSucursales()
-        {
-            return ticketDAO.crearInstancia().listarSucursales();
-        }
-        public DataTable getListarClientes()
-        {
-            return ticketDAO.crearInstancia().listarClientes();
-        }
-        public DataTable getListarReservas()
-        {
-            return ticketDAO.crearInstancia().listarReservas();
-        }
-        public DataTable getListarFunciones()
-        {
-            return ticketDAO.crearInstancia().listarFunciones();
-        }
+        // Methods calling corresponding methods from ticketDAO instance
+        public int getProximoTicket() => ticketDAO.crearInstancia().proximoTicket();
+        public bool getInsertarTicket(Ticket t) => ticketDAO.crearInstancia().insertarTicket(t);
+        public DataTable getListarTipoPagos() => ticketDAO.crearInstancia().listarTipoPagos();
+        public DataTable getListarSucursales() => ticketDAO.crearInstancia().listarSucursales();
+        public DataTable getListarClientes() => ticketDAO.crearInstancia().listarClientes();
+        public DataTable getListarReservas() => ticketDAO.crearInstancia().listarReservas();
+        public DataTable getListarFunciones() => ticketDAO.crearInstancia().listarFunciones();
     }
 }
